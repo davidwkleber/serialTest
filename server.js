@@ -54,6 +54,14 @@ function serveStatic(response, cache, absPath) {
 	}
 }
 
+function sleep(time, callback) {
+    var stop = new Date().getTime();
+    while(new Date().getTime() < stop + time) {
+        ;
+    }
+    callback();
+}
+
 // create HTTP server using anonymous function to define behavior
 var server = http.createServer(function(request, response) {
 	var filePath = false;
@@ -72,24 +80,87 @@ var server = http.createServer(function(request, response) {
 // start the HTTP server
 server.listen(3000, function() {
 	console.log("Server listening on port 3000");
+	//
+	//
+	//I did not know where to put the function calling. here it works. description is in the function
+	serialListener(); 
 });
 
 // var chatServer = require('./lib/chat_server');
 // chatServer.listen(server);
 
-var serialPort = new SerialPort("\\\\.\\COM3", { 
-	baudrate: 9600
-});
+// var serialPort = new SerialPort('\\COM9' , { 
+	// baudrate: 9600,
+		 // dataBits: 8,
+         // parity: 'none',
+         // stopBits: 1,
+         // flowControl: false
+// });
 
-serialPort.on("open", function () {
-	console.log('open');
-	serialPort.on('data', function(data) {
-		console.log('data received: ' + data);
-	});
-	serialPort.write("y6x", function(err, results) {
-		if(err) console.log('err ' + err);
+// serialPort.on("open", function () {
+	 // sleep(1000, function() {
+   // // executes after one second, and blocks the thread
+// });
+	// serialPort.write('S', function(err, results) {
+		// console.log('err ' + err);
+		// console.log('results ' + results);
+	// });
+	
+		// console.log('open');
+	// serialPort.on('data', function(data) {
+		// console.log('data received: ' + data);
+	// });
+// });
+
+function serialListener()
+{	//
+	//
+	//http://www.barryvandam.com/node-js-communicating-with-arduino/ 
+	//copied from the server.js file
+	var receivedData = "";
+    serialPort = new SerialPort('COM3', {
+        baudrate: 9600, 
+
+    });
+ 
+    serialPort.on("open", function () {
+		
+		//
+		//
+		//My guess is, that the function sends to fast after the port opening. The uController is still in the reset stage
+	
+		sleep(2000, function() {
+		// executes after two second, and blocks the thread, should be avoided. maybe we find another solution
+		});
+
+		serialPort.write('r0x', function(err, results) {
+		console.log('err ' + err);
 		console.log('results ' + results);
-	});
-});
+		});
+		
+		//
+		//
+		//you need some kind of delay between the different write commands; 200 seems to be the minimum delay.
+		
+		sleep(200, function() {
+		// executes after two second, and blocks the thread, should be avoided. maybe we find another solution
+		});
+		serialPort.write('r10x', function(err, results) {
+		console.log('err ' + err);
+		console.log('results ' + results);
+		});
 
-
+		
+		// console.log('open serial communication');
+            // // Listens to incoming data
+        // serialPort.on('data', function(data) {
+             // receivedData += data.toString();
+          // if (receivedData .indexOf('E') >= 0 && receivedData .indexOf('B') >= 0) {
+           // sendData = receivedData .substring(receivedData .indexOf('B') + 1, receivedData .indexOf('E'));
+           // receivedData = '';
+         // }
+         // send the incoming data to browser with websockets.
+       //socketServer.emit('update', sendData);
+      // });  
+    });  
+}

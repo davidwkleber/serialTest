@@ -6,11 +6,11 @@ var serialPort = new SerialPort("\\\\.\\COM6", {
 serialPort.on("open", function () {
 	console.log('open');
 	serialPort.on('data', function(data) {
-		console.log('data received: ' + data);
+		console.log('data received from serialTest.js: ' + data);
 	});
 	serialPort.write("S\n", function(err, results) {
 		console.log('err ' + err);
-		console.log('results ' + results);
+		console.log('results from serialTest.js ' + results);
 	});
 });
 
